@@ -6,11 +6,12 @@
 #include <string>
 
 int main(int argc, char** argv) {
-  std::string token = "5039903362:AAHtGiQvDpeMwHAGi9xHjDhDcsdZ1XBTwpw";
-
-  if (argc == 2) {
-    token = argv[1];
+  if (argc != 2) {
+    std::cout << argv[0] << " <token>";
+    return 1;
   }
+
+  std::string token = argv[1];
 
   Service service(token);
   service.start();

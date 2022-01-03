@@ -4,8 +4,6 @@
 
 #include "TelegramHandler.hpp"
 
-#include <vector>
-
 TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot) {
   m_bot = bot;
   m_attendantChat = nullptr;
