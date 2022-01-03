@@ -53,8 +53,8 @@ class LoggerAsync {
     LoggerAsync();
 
    private:
-    struct Impl;
-    std::unique_ptr<Impl> m_impl;
+//    struct Impl;
+//    std::unique_ptr<Impl> m_impl;
 };
 
 #endif// BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_
