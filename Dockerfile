@@ -23,6 +23,7 @@ RUN cmake --build . --target install --config release
 ADD ./app /app/app
 ADD ./include /app/include
 ADD ./src /app/src
+ADD ./third_party /app/third_party
 ADD ./CMakeLists.txt /app/CMakeLists.txt
 
 WORKDIR /app/build
