@@ -9,5 +9,8 @@ endif()
 
 include_directories(include)
 
+add_subdirectory(third_party/logger)
+include_directories(third_party/logger/include)
+
 add_subdirectory(app)
 add_subdirectory(src)

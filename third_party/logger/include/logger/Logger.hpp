@@ -16,12 +16,18 @@
  * @file
  * @brief
  */
-#ifndef BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_HPP_
-#define BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_HPP_
+#ifndef LOGGER_INCLUDE_LOGGER_LOGGER_HPP_
+#define LOGGER_INCLUDE_LOGGER_LOGGER_HPP_
 
-#include "LoggerAsync.hpp"
-#include "LoggerLevel.hpp"
+#include <logger/LoggerAsync.hpp>
+#include <logger/LoggerLevel.hpp>
 #include <sstream>
+
+/**
+ * @namespace logger
+ * @brief Logger's namespace
+ */
+namespace logger {
 
 /**
  * @class Logger
@@ -29,44 +35,34 @@
  * Write data as stream
  */
 class Logger {
- public:
-  Logger();
-  explicit Logger(LoggerLevel loggerLevel);
+   public:
+    Logger() = delete;
+    explicit Logger(LoggerLevel loggerLevel);
 
- public:
-  /**
-   * @brief
-   * @param loggerLevel
-   */
-  void setLevel(LoggerLevel loggerLevel);
-
-  /**
+   public:
+    /**
      * @brief Input log's payload as data stream
      * @tparam Payload Template param with log's payload
      * @param payload Log's payload
      * @return Stream ptr
      */
-  template<typename Payload>
-  std::ostream& operator<<(Payload const& payload) {
-    m_payload << payload;
-    return m_payload;
-  }
+    template <typename Payload>
+    std::ostream& operator<<(Payload const& payload) {
+        m_payload << payload;
+        return m_payload;
+    }
 
-  /**
+    /**
      * @brief Commit log's payload to logger
      */
-  void commit();
+    void commit();
 
- private:
-  LoggerLevel m_loggerLevel;
-  LoggerAsync& m_loggerAsync;
-  std::stringstream m_payload;
-
- private:
-  /**
-   * @brief
-   */
-  void clear();
+   private:
+    LoggerLevel m_loggerLevel;
+    LoggerAsync& m_loggerAsync;
+    std::stringstream m_payload;
 };
 
-#endif// BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_HPP_
+}// namespace logger
+
+#endif// LOGGER_INCLUDE_LOGGER_LOGGER_HPP_

@@ -2,10 +2,16 @@
 // Created by jadjer on 17.11.2021.
 //
 
-#ifndef BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_
-#define BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_
+#ifndef LOGGER_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_
+#define LOGGER_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_
 
 #include <memory>
+
+/**
+ * @namespace data_layer::logger
+ * @brief Logger's namespace
+ */
+namespace logger {
 
 /**
  * @class LoggerAsync
@@ -53,8 +59,10 @@ class LoggerAsync {
     LoggerAsync();
 
    private:
-//    struct Impl;
-//    std::unique_ptr<Impl> m_impl;
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 };
 
-#endif// BOT_OF_DUTY_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_
+}// namespace logger
+
+#endif// LOGGER_INCLUDE_LOGGER_LOGGER_ASYNC_HPP_

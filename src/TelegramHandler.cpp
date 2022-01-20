@@ -3,6 +3,7 @@
 //
 
 #include "TelegramHandler.hpp"
+#include <local_logger/Logger.hpp>
 
 TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot) {
   m_bot = bot;
@@ -14,9 +15,7 @@ void TelegramHandler::onCommandStart(TgBot::Message::Ptr const& message) {
 }
 
 void TelegramHandler::onCommandMarkMeAsAttendant(TgBot::Message::Ptr const& message) {
-  m_logger.setLevel(LOGGER_LEVEL_INFO);
-  m_logger << "mark_me_as_attendant";
-  m_logger.commit();
+  logger::log_info("mark_me_as_attendant");
 
   if (m_attendantChat == nullptr) {
     m_attendantChat = message->chat;
@@ -34,9 +33,7 @@ void TelegramHandler::onCommandMarkMeAsAttendant(TgBot::Message::Ptr const& mess
 }
 
 void TelegramHandler::onCommandUnmarkMeAsAttendant(TgBot::Message::Ptr const& message) {
-  m_logger.setLevel(LOGGER_LEVEL_INFO);
-  m_logger << "unmark_me_as_attendant";
-  m_logger.commit();
+  logger::log_info("unmark_me_as_attendant");
 
   if (m_attendantChat == nullptr) {
     m_bot->getApi().sendMessage(message->chat->id, "Your not marked as attendant");
@@ -53,9 +50,7 @@ void TelegramHandler::onCommandUnmarkMeAsAttendant(TgBot::Message::Ptr const& me
 }
 
 void TelegramHandler::onCommandWhoIsAttendant(TgBot::Message::Ptr const& message) {
-  m_logger.setLevel(LOGGER_LEVEL_INFO);
-  m_logger << "who_is_attendant";
-  m_logger.commit();
+  logger::log_info("who_is_attendant");
 
   if (m_attendantChat == nullptr) {
     m_bot->getApi().sendMessage(message->chat->id, "Attendant is not assigned");
@@ -74,8 +69,12 @@ void TelegramHandler::onNonCommandMessage(TgBot::Message::Ptr const& message) {
   }
 
   if (message->chat->id == m_attendantChat->id) {
+    m_bot->getApi().sendMessage(message->chat->id, "Your are attendant. The message has not been send");
     return;
   }
 
+  logger::log_info("message_from_{}", message->chat->username);
+
+  m_bot->getApi().sendMessage(message->chat->id, "The message has been send");
   m_bot->getApi().forwardMessage(m_attendantChat->id, message->chat->id, message->messageId);
 }

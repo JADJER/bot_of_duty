@@ -19,9 +19,9 @@ set(HEADERS
         ${PROJECT_SOURCE_DIR}/include/TelegramWorker.hpp
         ${PROJECT_SOURCE_DIR}/include/TelegramHandler.hpp
 
-        ${PROJECT_SOURCE_DIR}/include/logger/Logger.hpp
-        ${PROJECT_SOURCE_DIR}/include/logger/LoggerAsync.hpp
-        ${PROJECT_SOURCE_DIR}/include/logger/LoggerLevel.hpp
+        ${PROJECT_SOURCE_DIR}/include/local_logger/Logger.hpp
+        ${PROJECT_SOURCE_DIR}/include/local_logger/LoggerProxy.hpp
+        ${PROJECT_SOURCE_DIR}/include/local_logger/pch.hpp
         )
 
 set(SOURCES
@@ -29,8 +29,7 @@ set(SOURCES
         TelegramWorker.cpp
         TelegramHandler.cpp
 
-        logger/Logger.cpp
-        logger/LoggerAsync.cpp
+        local_logger/Logger.cpp
         )
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})

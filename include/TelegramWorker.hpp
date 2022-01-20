@@ -29,7 +29,6 @@ class TelegramWorker {
   void addCallbackQuery(CallbackQueryListener const& listener);
 
  private:
-  Logger m_logger;
   std::thread m_thread;
   std::atomic_bool m_enable;
   std::shared_ptr<TgBot::Bot> m_bot;

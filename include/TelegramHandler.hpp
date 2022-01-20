@@ -6,7 +6,6 @@
 #define BOT_OF_DUTY_INCLUDE_TELEGRAMHANDLER_HPP_
 
 #include <tgbot/tgbot.h>
-#include <logger/Logger.hpp>
 
 class TelegramHandler {
  public:
@@ -21,7 +20,6 @@ class TelegramHandler {
   void onNonCommandMessage(TgBot::Message::Ptr const& message);
 
  private:
-  Logger m_logger;
   TgBot::Chat::Ptr m_attendantChat;
   std::shared_ptr<TgBot::Bot> m_bot;
 };
