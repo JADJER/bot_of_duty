@@ -57,10 +57,6 @@ class LoggerAsync {
 
    private:
     LoggerAsync();
-
-   private:
-    struct Impl;
-    std::unique_ptr<Impl> m_impl;
 };
 
 }// namespace logger
