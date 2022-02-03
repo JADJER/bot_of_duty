@@ -5,7 +5,7 @@
 #include <TelegramWorker.hpp>
 #include <exception>
 #include <iostream>
-#include <local_logger/Logger.hpp>
+#include <spdlog/spdlog.h>
 
 TelegramWorker::TelegramWorker(std::shared_ptr<TgBot::Bot> const& bot)
     : m_enable(true) {
@@ -45,18 +45,18 @@ void TelegramWorker::addCallbackQuery(CallbackQueryListener const& listener) {
 }
 
 void TelegramWorker::loop() {
-  logger::log_info("Bot username: {}", m_bot->getApi().getMe()->username);
+  spdlog::info("Bot username: {}", m_bot->getApi().getMe()->username);
 
   m_bot->getApi().deleteWebhook();
   TgBot::TgLongPoll longPoll(*m_bot);
 
-  logger::log_info("Long poll started");
+  spdlog::info("Long poll started");
 
   while (m_enable) {
     try {
       longPoll.start();
     } catch (std::exception& e) {
-      logger::log_error("Error: {}", e.what());
+      spdlog::error("Error: {}", e.what());
     }
   }
 }

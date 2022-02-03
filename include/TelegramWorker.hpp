@@ -6,8 +6,6 @@
 #define BOT_OF_DUTY_INCLUDE_TELEGRAMWORKER_HPP_
 
 #include <atomic>
-//#include <leveldb/export.h>
-#include <logger/Logger.hpp>
 #include <memory>
 #include <tgbot/tgbot.h>
 #include <thread>

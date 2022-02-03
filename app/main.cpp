@@ -3,11 +3,12 @@
 //
 
 #include <Service.hpp>
+#include <spdlog/spdlog.h>
 #include <string>
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cout << argv[0] << " <token>";
+    spdlog::critical("{} <token>", std::string(argv[0]));
     return 1;
   }
 

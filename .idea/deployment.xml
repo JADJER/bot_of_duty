@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="jadjer.me (11360b6c-4f12-4959-9f98-bdd4ce53bc13)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/bot_of_duty" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
