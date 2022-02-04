@@ -33,6 +33,8 @@ class TelegramHandler {
 
   void messageFromAttendant(TgBot::Message::Ptr const& message);
   void messageFromNonAttendant(TgBot::Message::Ptr const& message);
+
+  void eraseMessageMap();
 };
 
 #endif//BOT_OF_DUTY_INCLUDE_TELEGRAMHANDLER_HPP_

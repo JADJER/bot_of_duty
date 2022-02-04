@@ -148,4 +148,14 @@ void TelegramHandler::messageFromNonAttendant(TgBot::Message::Ptr const& message
   }
 
   m_messageMap.push_back(newMessageMap);
+
+  eraseMessageMap();
+}
+
+void TelegramHandler::eraseMessageMap() {
+  if (m_messageMap.size() < 10000) {
+    return;
+  }
+
+  m_messageMap.erase(m_messageMap.begin());
 }

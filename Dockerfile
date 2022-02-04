@@ -3,23 +3,24 @@ FROM fedora
 RUN dnf groupinstall -y "Development Tools"
 RUN dnf install -y cmake perl python-pip
 
-RUN useradd -m bot
+RUN useradd -ms /bin/bash bot
 USER bot
 
-RUN pwd
+ENV PATH="/home/bot/.local/bin:$PATH"
 
 RUN pip install conan
 
-ADD . /app
+RUN mkdir -p /home/bot/app/src
+RUN chown -R bot /home/bot/app
 
-WORKDIR /app/build
+WORKDIR /home/bot/app
 
-RUN conan install .. --build=missing
+COPY . ./src
 
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release
+RUN conan install src --build=missing -s compiler.libcxx=libstdc++11
+
+RUN cmake src
 RUN cmake --build . --config release
 
-
-
 # Установим точку входа
-ENTRYPOINT ["/app/build/app/bot_of_duty_app"]
+ENTRYPOINT ["/home/bot/app/app/bot_of_duty_app"]

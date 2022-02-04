@@ -14,7 +14,8 @@ set(SOURCES
 
 add_library(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${tgbot_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${spdlog_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME}
         EXPORT export_${PROJECT_NAME}
