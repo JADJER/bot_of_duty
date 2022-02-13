@@ -11,6 +11,12 @@ Service::Service(std::string const& token) {
   m_telegramHandler = std::make_unique<TelegramHandler>(m_bot);
 }
 
+Service::Service(std::string const& token, std::string const& jsonFilePath)
+    : Service(token) {
+
+  m_telegramHandler = std::make_unique<TelegramHandler>(m_bot, jsonFilePath);
+}
+
 void Service::start() {
   m_telegramWorker->addCommandHandler("start", [this](auto&& PH1) { m_telegramHandler->onCommandStart(std::forward<decltype(PH1)>(PH1)); });
   m_telegramWorker->addCommandHandler("mark_me_as_attendant", [this](auto&& PH1) { m_telegramHandler->onCommandMarkMeAsAttendant(std::forward<decltype(PH1)>(PH1)); });
@@ -20,4 +26,8 @@ void Service::start() {
   m_telegramWorker->addMessageHandler([this](auto&& PH1) { m_telegramHandler->onNonCommandMessage(std::forward<decltype(PH1)>(PH1)); });
 
   m_telegramWorker->start();
+}
+
+void Service::stop() {
+  m_telegramWorker->stop();
 }

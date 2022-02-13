@@ -4,7 +4,6 @@
 
 #include <TelegramWorker.hpp>
 #include <exception>
-#include <iostream>
 #include <spdlog/spdlog.h>
 
 TelegramWorker::TelegramWorker(std::shared_ptr<TgBot::Bot> const& bot)

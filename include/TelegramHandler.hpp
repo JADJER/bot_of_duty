@@ -5,12 +5,19 @@
 #ifndef BOT_OF_DUTY_INCLUDE_TELEGRAMHANDLER_HPP_
 #define BOT_OF_DUTY_INCLUDE_TELEGRAMHANDLER_HPP_
 
+#include <Attendant.hpp>
+#include <Message.hpp>
+#include <SQLiteCpp/SQLiteCpp.h>
+#include <SQLiteCpp/VariadicBind.h>
+#include <problem/IProblem.hpp>
 #include <tgbot/tgbot.h>
 #include <vector>
 
 class TelegramHandler {
  public:
+  TelegramHandler() = delete;
   explicit TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot);
+  TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot, std::string const& pathFile);
 
  public:
   void onCommandStart(TgBot::Message::Ptr const& message);
@@ -21,20 +28,14 @@ class TelegramHandler {
 
  private:
   std::shared_ptr<TgBot::Bot> m_bot;
-  std::vector<TgBot::Chat::Ptr> m_attendantChats;
+  std::unique_ptr<Message> m_messages;
+  std::unique_ptr<IProblem> m_problems;
+  std::shared_ptr<SQLite::Database> m_db;
+  std::unique_ptr<Attendant> m_attendants;
 
-  struct MessageMap {
-    std::int64_t sourceChatId;
-    std::int32_t sourceMessageId;
-    std::vector<std::int32_t> forwardsMessageId;
-  };
-
-  std::vector<MessageMap> m_messageMap;
-
+ private:
   void messageFromAttendant(TgBot::Message::Ptr const& message);
   void messageFromNonAttendant(TgBot::Message::Ptr const& message);
-
-  void eraseMessageMap();
 };
 
 #endif//BOT_OF_DUTY_INCLUDE_TELEGRAMHANDLER_HPP_

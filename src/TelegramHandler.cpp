@@ -2,13 +2,22 @@
 // Created by jadjer on 28.12.2021.
 //
 
-#include "TelegramHandler.hpp"
+#include <TelegramHandler.hpp>
+#include <problem/ProblemImpl.hpp>
 #include <spdlog/spdlog.h>
 
 TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot) {
+  m_db = std::make_unique<SQLite::Database>("bod.db3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
   m_bot = bot;
-  m_messageMap = {};
-  m_attendantChats = {};
+
+  m_problems = nullptr;
+  m_messages = std::make_unique<Message>(m_db);
+  m_attendants = std::make_unique<Attendant>(m_db);
+}
+
+TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot, std::string const& pathFile)
+    : TelegramHandler(bot) {
+  m_problems = std::make_unique<ProblemImpl>(pathFile);
 }
 
 void TelegramHandler::onCommandStart(TgBot::Message::Ptr const& message) {
@@ -19,16 +28,22 @@ void TelegramHandler::onCommandMarkMeAsAttendant(TgBot::Message::Ptr const& mess
   spdlog::info("------------------------------");
   spdlog::info("mark_me_as_attendant | {}", message->chat->username);
 
-  auto attendantIterator = std::find_if(m_attendantChats.begin(), m_attendantChats.end(), [&message](auto const& chatId) {
-    return message->chat->id == chatId->id;
+  auto attendantIterator = std::find_if(m_attendants->begin(), m_attendants->end(), [&message](AttendantItem const& item) {
+    return message->chat->id == item.chatId;
   });
 
-  if (attendantIterator != m_attendantChats.end()) {
+  if (attendantIterator != m_attendants->end()) {
     m_bot->getApi().sendMessage(message->chat->id, "Your already marked as attendant.");
     return;
   }
 
-  m_attendantChats.push_back(message->chat);
+  AttendantItem item;
+  item.chatId = message->chat->id;
+  item.userName = message->chat->username;
+  item.firstName = message->chat->firstName;
+  item.secondName = message->chat->lastName;
+
+  m_attendants->setAttendant(item);
   m_bot->getApi().sendMessage(message->chat->id, "Your mark as attendant.");
 }
 
@@ -36,16 +51,12 @@ void TelegramHandler::onCommandUnmarkMeAsAttendant(TgBot::Message::Ptr const& me
   spdlog::info("------------------------------");
   spdlog::info("unmark_me_as_attendant | {}", message->chat->username);
 
-  auto attendantIterator = std::find_if(m_attendantChats.begin(), m_attendantChats.end(), [&message](auto const& chatId) {
-    return message->chat->id == chatId->id;
-  });
-
-  if (attendantIterator == m_attendantChats.end()) {
+  auto attendantHasDeleted = m_attendants->deleteAttendant(message->chat->id);
+  if (not attendantHasDeleted) {
     m_bot->getApi().sendMessage(message->chat->id, "Your not marked as attendant.");
     return;
   }
 
-  m_attendantChats.erase(attendantIterator);
   m_bot->getApi().sendMessage(message->chat->id, "Your unmark as attendant.");
 }
 
@@ -53,22 +64,22 @@ void TelegramHandler::onCommandWhoIsAttendant(TgBot::Message::Ptr const& message
   spdlog::info("------------------------------");
   spdlog::info("who_is_attendant | {}", message->chat->username);
 
-  if (m_attendantChats.empty()) {
+  if (m_attendants->isEmpty()) {
     m_bot->getApi().sendMessage(message->chat->id, "Attendant is not assigned.");
     return;
   }
 
-  for (auto const& attendant : m_attendantChats) {
-    m_bot->getApi().sendMessage(message->chat->id, "Attendant is " + attendant->firstName + " (@" + attendant->username + ").");
+  for (auto const& attendant : *m_attendants) {
+    m_bot->getApi().sendMessage(message->chat->id, "Attendant is " + attendant.firstName + " (@" + attendant.userName + ").");
   }
 }
 
 void TelegramHandler::onNonCommandMessage(TgBot::Message::Ptr const& message) {
-  auto attendantIterator = std::find_if(m_attendantChats.begin(), m_attendantChats.end(), [&message](auto const& chatId) {
-    return message->chat->id == chatId->id;
+  auto attendantIterator = std::find_if(m_attendants->begin(), m_attendants->end(), [&message](AttendantItem const& item) {
+    return message->chat->id == item.chatId;
   });
 
-  if (attendantIterator != m_attendantChats.end()) {
+  if (attendantIterator != m_attendants->end()) {
     messageFromAttendant(message);
   } else {
     messageFromNonAttendant(message);
@@ -88,30 +99,13 @@ void TelegramHandler::messageFromAttendant(TgBot::Message::Ptr const& message) {
     return;
   }
 
-  auto messageMapIterator = std::find_if(m_messageMap.cbegin(), m_messageMap.cend(), [&message](MessageMap const& messageFromMap) -> bool {
-
-    auto messageIdIterator = std::find_if(messageFromMap.forwardsMessageId.cbegin(), messageFromMap.forwardsMessageId.cend(), [&message](std::int32_t messageId) -> bool {
-      if (message->replyToMessage->messageId == messageId) {
-        spdlog::info("Reply to message ID {}", messageId);
-        return true;
-      }
-
-      return false;
-    });
-
-
-    if (messageIdIterator != messageFromMap.forwardsMessageId.end()) {
-      return true;
-    }
-
-    return false;
-  });
-
-  if (messageMapIterator != m_messageMap.end()) {
-    m_bot->getApi().forwardMessage(messageMapIterator->sourceChatId, message->chat->id, message->messageId);
-  } else {
+  auto sourceChatIdOptional = m_messages->getSourceChatId(message->replyToMessage->messageId);
+  if (not sourceChatIdOptional) {
     spdlog::info("Message ID not found");
+    return;
   }
+
+  m_bot->getApi().forwardMessage(sourceChatIdOptional.value(), message->chat->id, message->messageId);
 }
 
 void TelegramHandler::messageFromNonAttendant(TgBot::Message::Ptr const& message) {
@@ -122,36 +116,19 @@ void TelegramHandler::messageFromNonAttendant(TgBot::Message::Ptr const& message
                message->chat->id,
                message->chat->firstName);
 
-  if (m_attendantChats.empty()) {
+  if (m_attendants->isEmpty()) {
     m_bot->getApi().sendMessage(message->chat->id, "Attendant is not assigned.");
     return;
   }
 
-  MessageMap newMessageMap;
-  newMessageMap.sourceChatId = message->chat->id;
-  newMessageMap.sourceMessageId = message->messageId;
+  std::vector<int64_t> forwardsMessageId;
 
-  for (auto const& attendant : m_attendantChats) {
-    auto sentMessage = m_bot->getApi().forwardMessage(attendant->id, message->chat->id, message->messageId);
+  for (auto const& attendant : *m_attendants) {
+    auto sentMessage = m_bot->getApi().forwardMessage(attendant.chatId, message->chat->id, message->messageId);
     if (sentMessage) {
-      newMessageMap.forwardsMessageId.push_back(sentMessage->messageId);
+      forwardsMessageId.push_back(sentMessage->messageId);
     }
   }
 
-  spdlog::info("Associate message ID {} as:", message->messageId);
-  for (auto const& messageId : newMessageMap.forwardsMessageId) {
-    spdlog::info("Forward message ID: {}" , messageId);
-  }
-
-  m_messageMap.push_back(newMessageMap);
-
-  eraseMessageMap();
-}
-
-void TelegramHandler::eraseMessageMap() {
-  if (m_messageMap.size() < 10000) {
-    return;
-  }
-
-  m_messageMap.erase(m_messageMap.begin());
+  m_messages->addMessage(message->chat->id, forwardsMessageId);
 }

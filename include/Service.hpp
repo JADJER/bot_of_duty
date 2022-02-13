@@ -10,12 +10,31 @@
 #include <TelegramWorker.hpp>
 #include <TelegramHandler.hpp>
 
+/**
+ * @class Service
+ * @brief
+ */
 class Service {
  public:
+  /**
+   * @brief
+   * @param token
+   */
   explicit Service(std::string const& token);
 
+  /**
+   * @brief
+   * @param token
+   * @param jsonFilePath
+   */
+  Service(std::string const& token, std::string const& jsonFilePath);
+
  public:
+  /**
+   * @brief Start service loop
+   */
   void start();
+  void stop();
 
  private:
   std::shared_ptr<TgBot::Bot> m_bot;
