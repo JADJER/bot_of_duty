@@ -6,18 +6,23 @@
 #include <problem/ProblemImpl.hpp>
 #include <spdlog/spdlog.h>
 
-TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot) {
-  m_db = std::make_unique<SQLite::Database>("bod.db3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot, std::string const& problemJsonFile, std::string const& databasePath) {
   m_bot = bot;
 
-  m_problems = nullptr;
+  if (not databasePath.empty()) {
+    m_db = std::make_unique<SQLite::Database>(databasePath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+  } else {
+    spdlog::warn("Database not created. Path not settled");
+  }
+
+  if (not problemJsonFile.empty()) {
+    m_problems = std::make_unique<ProblemImpl>(problemJsonFile);
+  } else {
+    spdlog::warn("Problems not loaded. File path not settled.");
+  }
+
   m_messages = std::make_unique<Message>(m_db);
   m_attendants = std::make_unique<Attendant>(m_db);
-}
-
-TelegramHandler::TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot, std::string const& pathFile)
-    : TelegramHandler(bot) {
-  m_problems = std::make_unique<ProblemImpl>(pathFile);
 }
 
 void TelegramHandler::onCommandStart(TgBot::Message::Ptr const& message) {

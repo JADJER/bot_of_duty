@@ -19,15 +19,9 @@ class Service {
   /**
    * @brief
    * @param token
-   */
-  explicit Service(std::string const& token);
-
-  /**
-   * @brief
-   * @param token
    * @param jsonFilePath
    */
-  Service(std::string const& token, std::string const& jsonFilePath);
+  explicit Service(std::string const& token, std::string const& jsonFilePath = "", std::string const& databasePath = "");
 
  public:
   /**

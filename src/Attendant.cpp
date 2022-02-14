@@ -7,20 +7,22 @@
 Attendant::Attendant(std::shared_ptr<SQLite::Database> const& database) {
   m_db = database;
 
-  const bool tableExist = m_db->tableExists("Attendants");
-  if (not tableExist) {
-    m_db->exec("CREATE TABLE Attendants (id INTEGER PRIMARY KEY, chatId INTEGER, username TEXT, firstName TEXT, secondName TEXT)");
-  }
+  if (m_db) {
+    const bool tableExist = m_db->tableExists("Attendants");
+    if (not tableExist) {
+      m_db->exec("CREATE TABLE Attendants (id INTEGER PRIMARY KEY, chatId INTEGER, username TEXT, firstName TEXT, secondName TEXT)");
+    }
 
-  SQLite::Statement query(*m_db, "SELECT * FROM Attendants");
-  while (query.executeStep()) {
-    AttendantItem item;
-    item.chatId = query.getColumn(1);
-    item.userName = query.getColumn(2).getString();
-    item.firstName = query.getColumn(3).getString();
-    item.secondName = query.getColumn(4).getString();
+    SQLite::Statement query(*m_db, "SELECT * FROM Attendants");
+    while (query.executeStep()) {
+      AttendantItem item;
+      item.chatId = query.getColumn(1);
+      item.userName = query.getColumn(2).getString();
+      item.firstName = query.getColumn(3).getString();
+      item.secondName = query.getColumn(4).getString();
 
-    m_attendantChats.push_back(item);
+      m_attendantChats.push_back(item);
+    }
   }
 }
 
@@ -31,10 +33,12 @@ std::vector<AttendantItem> Attendant::getAttendants() {
 void Attendant::setAttendant(AttendantItem const& attendant) {
   m_attendantChats.push_back(attendant);
 
-  m_db->exec("INSERT INTO Attendants VALUES (NULL, " + std::to_string(attendant.chatId) +
-                 ", \"" + attendant.userName +
-                 "\", \"" + attendant.firstName +
-                 "\", \"" + attendant.secondName +"\")");
+  if (m_db) {
+    m_db->exec("INSERT INTO Attendants VALUES (NULL, " + std::to_string(attendant.chatId) +
+               ", \"" + attendant.userName +
+               "\", \"" + attendant.firstName +
+               "\", \"" + attendant.secondName +"\")");
+  }
 }
 
 bool Attendant::deleteAttendant(std::int64_t chatId) {
@@ -47,7 +51,11 @@ bool Attendant::deleteAttendant(std::int64_t chatId) {
   }
 
   m_attendantChats.erase(attendantIterator);
-  m_db->exec("DELETE FROM Attendants WHERE chatId = " + std::to_string(chatId));
+
+  if (m_db) {
+    m_db->exec("DELETE FROM Attendants WHERE chatId = " + std::to_string(chatId));
+  }
+
   return true;
 }
 

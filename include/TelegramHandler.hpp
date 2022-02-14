@@ -16,8 +16,7 @@
 class TelegramHandler {
  public:
   TelegramHandler() = delete;
-  explicit TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot);
-  TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot, std::string const& pathFile);
+  explicit TelegramHandler(std::shared_ptr<TgBot::Bot> const& bot, std::string const& problemJsonFile = "", std::string const& databasePath = "");
 
  public:
   void onCommandStart(TgBot::Message::Ptr const& message);

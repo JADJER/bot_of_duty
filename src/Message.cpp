@@ -8,18 +8,20 @@
 Message::Message(std::shared_ptr<SQLite::Database> const& database) {
   m_db = database;
 
-  const bool tableExist = m_db->tableExists("Messages");
-  if (not tableExist) {
-    m_db->exec("CREATE TABLE Messages (id INTEGER PRIMARY KEY, source INTEGER, forward INTEGER)");
-  }
+  if (m_db) {
+    const bool tableExist = m_db->tableExists("Messages");
+    if (not tableExist) {
+      m_db->exec("CREATE TABLE Messages (id INTEGER PRIMARY KEY, source INTEGER, forward INTEGER)");
+    }
 
-  SQLite::Statement query(*m_db, "SELECT * FROM Messages");
-  while (query.executeStep()) {
-    MessageMap messageMap{};
-    messageMap.sourceChatId = query.getColumn(1);
-    messageMap.forwardMessageId = query.getColumn(2);
+    SQLite::Statement query(*m_db, "SELECT * FROM Messages");
+    while (query.executeStep()) {
+      MessageMap messageMap{};
+      messageMap.sourceChatId = query.getColumn(1);
+      messageMap.forwardMessageId = query.getColumn(2);
 
-    m_messagesMap.push_back(messageMap);
+      m_messagesMap.push_back(messageMap);
+    }
   }
 }
 
@@ -31,7 +33,10 @@ void Message::addMessage(std::int64_t sourceChatId, int64_t forwardMessageId) {
   m_messagesMap.push_back(messageMap);
 
   spdlog::info("Associate message ID {} as {}:", sourceChatId, forwardMessageId);
-  m_db->exec("INSERT INTO Messages VALUES (NULL, " + std::to_string(sourceChatId) + ", " + std::to_string(forwardMessageId) + ")");
+
+  if (m_db) {
+    m_db->exec("INSERT INTO Messages VALUES (NULL, " + std::to_string(sourceChatId) + ", " + std::to_string(forwardMessageId) + ")");
+  }
 }
 
 void Message::addMessage(std::int64_t sourceChatId, std::vector<std::int64_t> const& forwardsMessageId) {

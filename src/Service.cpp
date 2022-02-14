@@ -4,17 +4,11 @@
 
 #include "Service.hpp"
 
-Service::Service(std::string const& token) {
+Service::Service(std::string const& token, std::string const& jsonFilePath, std::string const& databasePath) {
   m_bot = std::make_shared<TgBot::Bot>(token);
 
   m_telegramWorker = std::make_unique<TelegramWorker>(m_bot);
-  m_telegramHandler = std::make_unique<TelegramHandler>(m_bot);
-}
-
-Service::Service(std::string const& token, std::string const& jsonFilePath)
-    : Service(token) {
-
-  m_telegramHandler = std::make_unique<TelegramHandler>(m_bot, jsonFilePath);
+  m_telegramHandler = std::make_unique<TelegramHandler>(m_bot, jsonFilePath, databasePath);
 }
 
 void Service::start() {
