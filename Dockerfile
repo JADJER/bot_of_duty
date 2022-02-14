@@ -23,4 +23,4 @@ RUN cmake src
 RUN cmake --build . --config release
 
 # Установим точку входа
-ENTRYPOINT ["/home/bot/app/app/bot_of_duty_app"]
+ENTRYPOINT ["/home/bot/app/bin/bot_of_duty_app"]

@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
 
   signal(SIGINT, [](int s) {
     spdlog::info("SIGINT got");
+    exit(1);
   });
 
   service->start();
